@@ -15,40 +15,29 @@
 
   <body>
     <h1>Channel messaging demo</h1>
-    <p>Message not yet sent</p>
 
-    <form>
-      <label for="message-box">Send a message</label>
-      <input type="text" id="message-box" class="message-box" autofocus>
-      <button>Send Message</button>
-    </form>
-
-    <iframe src="page2.html" width='480' height='320'>
+    <iframe src="page1.html" width='480' height='150'>
+    </iframe>
+    <iframe src="page2.html" width='480' height='150'>
     </iframe>
   </body>
   <script>
-    var para = document.querySelector('p');
+    var ifr = document.querySelectorAll('iframe');
+    var otherWindow2 = ifr[1].contentWindow;
+    var port;
 
-    var textInput = document.querySelector('.message-box');
-    var button = document.querySelector('button');
-    
-    var ifr = document.querySelector('iframe');
-    var otherWindow = ifr.contentWindow;
+    addEventListener("DOMContentLoaded", loadHandler, false);
 
-    ifr.addEventListener("load", iframeLoaded, false);
-    
-    function iframeLoaded() {
-      button.onclick = function(e) {
-        e.preventDefault();
-        
-        var channel = new MessageChannel();
-        otherWindow.postMessage(textInput.value, '*', [channel.port2]);
-
-        channel.port1.onmessage = handleMessage;
-        function handleMessage(e) {
-          para.innerHTML = e.data;
-          textInput.value = '';
-        } 
+    function loadHandler() {
+      window.onmessage = function(e) {
+        if (e.data === 'init') {
+          port = e.ports[0];
+          port.postMessage('hello from main!');
+          otherWindow2.postMessage(e.data, '*', e.ports);
+          // The following line won't work because port has been
+          // handed over to otherWindow
+          port.postMessage('hello again from main!');
+        }
       }
     }
 

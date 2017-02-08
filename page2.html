@@ -15,20 +15,28 @@
 
   <body>
     <ul>
-      
+
     </ul>
   </body>
   <script>
   var list = document.querySelector('ul');
+  var port;
 
   onmessage = function(e) {
-    var listItem = document.createElement('li');
-    listItem.textContent = e.data;
-  	list.appendChild(listItem);
-  	// e.ports[0] is channel.port2, sent from the main frame
-  	e.ports[0].postMessage('Message received by IFrame: "' + e.data + '"');
+    if (e.data === 'init') {
+      console.log('Page2 received init');
+      port = e.ports[0];
+      port.postMessage('Message received by IFrame2: "' + e.data + '"');
+      //sets up message listener on port
+      port.onmessage = function(e) {
+        var listItem = document.createElement('li');
+        listItem.textContent = e.data;
+        list.appendChild(listItem);
+        port.postMessage('Message received by IFrame2 in MC: "' + e.data + '"');
+      };
+    }
   }
-  
+
 
   </script>
 </html>
